@@ -208,7 +208,7 @@ class Event(Base):
     resolved_at = Column(DateTime, nullable=True)
     resolution_notes = Column(Text, nullable=True)
     false_positive = Column(Boolean, default=False)
-    metadata = Column(JSON, default=dict)  # Additional event-specific data
+    event_metadata = Column(JSON, default=dict)  # Additional event-specific data
 
     # Relationships
     person = relationship("Person", back_populates="events")
@@ -291,7 +291,7 @@ class Anomaly(Base):
     description = Column(Text, nullable=False)
     track_id = Column(Integer, nullable=True)
     is_false_positive = Column(Boolean, default=False)
-    metadata = Column(JSON, default=dict)
+    anomaly_metadata = Column(JSON, default=dict)
 
     def __repr__(self):
         return f"<Anomaly(id={self.id}, type='{self.anomaly_type}', score={self.anomaly_score:.2f})>"
