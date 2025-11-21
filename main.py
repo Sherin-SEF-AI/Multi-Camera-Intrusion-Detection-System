@@ -306,23 +306,73 @@ def main():
     parser.add_argument(
         '--gui',
         action='store_true',
-        help='Launch GUI interface (default: basic OpenCV display)'
+        default=True,  # GUI mode is default now
+        help='Launch GUI interface (default mode)'
+    )
+    parser.add_argument(
+        '--no-gui',
+        action='store_true',
+        help='Use basic OpenCV display instead of GUI'
     )
 
     args = parser.parse_args()
 
-    # Create and start system
+    # Create system
     system = IntrusionDetectionSystem(config_path=args.config)
 
-    try:
-        if system.start():
-            system.run()
-    except Exception as e:
-        logger = get_logger(__name__)
-        logger.error(f"Fatal error: {e}", exc_info=True)
-        return 1
-    finally:
-        system.stop()
+    # Launch GUI or basic mode
+    if args.no_gui:
+        # Basic OpenCV display mode
+        try:
+            if system.start():
+                system.run()
+        except Exception as e:
+            logger = get_logger(__name__)
+            logger.error(f"Fatal error: {e}", exc_info=True)
+            return 1
+        finally:
+            system.stop()
+    else:
+        # PyQt6 GUI mode (default)
+        try:
+            from PyQt6.QtWidgets import QApplication
+            from app.gui.main_window import MainWindow
+
+            app = QApplication(sys.argv)
+            app.setApplicationName("Intrusion Detection System")
+            app.setOrganizationName("SecureVision")
+
+            # Create main window
+            main_window = MainWindow(system)
+
+            # Connect shutdown signal
+            main_window.shutdown_requested.connect(app.quit)
+
+            # Show window
+            main_window.show()
+
+            # Run application
+            return app.exec()
+
+        except ImportError as e:
+            logger = get_logger(__name__)
+            logger.error(f"PyQt6 not available: {e}")
+            logger.info("Falling back to basic mode...")
+
+            # Fallback to basic mode
+            try:
+                if system.start():
+                    system.run()
+            except Exception as e:
+                logger.error(f"Fatal error: {e}", exc_info=True)
+                return 1
+            finally:
+                system.stop()
+
+        except Exception as e:
+            logger = get_logger(__name__)
+            logger.error(f"Fatal error in GUI mode: {e}", exc_info=True)
+            return 1
 
     return 0
 
