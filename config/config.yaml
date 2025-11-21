@@ -78,12 +78,14 @@ behavior:
   crowd_analysis: true
 
 # Anomaly Detection
-anomaly:
+anomaly_detection:
   enabled: true
-  algorithm: "isolation_forest"  # isolation_forest, autoencoder, one_class_svm
-  training_period: 7  # days to collect normal behavior
-  contamination: 0.1  # expected proportion of anomalies
-  sensitivity: 0.5  # 0.0 (low) to 1.0 (high)
+  contamination: 0.1  # expected proportion of anomalies (0.05-0.2)
+  n_estimators: 100  # number of isolation trees
+  max_samples: 256  # samples per tree
+  training_buffer_size: 1000  # samples to keep for retraining
+  retrain_interval: 300  # seconds between retraining
+  model_path: "models/anomaly_detector.pkl"
 
 # Threat Assessment
 threat:
@@ -210,6 +212,21 @@ security:
   encrypt_database: false
   encrypt_recordings: false
   password_min_length: 8
+
+# Authentication Settings
+authentication:
+  session_timeout: 3600  # seconds (1 hour)
+  max_login_attempts: 5
+  lockout_duration: 900  # seconds (15 minutes)
+  password_min_length: 8
+  require_strong_password: true  # require uppercase, lowercase, digit, special char
+
+# Audit Logging Settings
+audit_logging:
+  enabled: true
+  log_to_database: true  # persist to database
+  log_to_file: true  # log to file via standard logger
+  retention_days: 90  # days to keep audit logs
 
 # GUI Settings
 gui:

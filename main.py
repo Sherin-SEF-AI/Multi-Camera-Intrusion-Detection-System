@@ -23,6 +23,14 @@ from app.database.database_manager import DatabaseManager
 from app.core.camera_manager import CameraManager
 from app.core.detection_engine import DetectionEngine
 from app.core.tracking_engine import TrackingEngine
+from app.core.person_reid import PersonReID
+from app.core.behavioral_analysis import BehavioralAnalysis
+from app.core.threat_assessment import ThreatAssessment
+from app.core.zone_manager import ZoneManager
+from app.core.anomaly_detector import AnomalyDetector
+from app.alerts.alert_manager import AlertManager
+from app.security.auth_manager import AuthenticationManager
+from app.security.audit_logger import AuditLogger, AuditEventType, AuditSeverity
 
 # Global flag for graceful shutdown
 shutdown_requested = False
@@ -61,6 +69,14 @@ class IntrusionDetectionSystem:
         self.camera_manager = None
         self.detection_engine = None
         self.tracking_engines = {}  # One tracker per camera
+        self.person_reid = None
+        self.behavioral_analysis = None
+        self.threat_assessment = None
+        self.zone_manager = None
+        self.anomaly_detector = None
+        self.alert_manager = None
+        self.auth_manager = None
+        self.audit_logger = None
 
         self.is_running = False
 
@@ -109,6 +125,46 @@ class IntrusionDetectionSystem:
             for camera_id in self.camera_manager.get_all_cameras().keys():
                 tracker = TrackingEngine(self.config.get_all())
                 self.tracking_engines[camera_id] = tracker
+
+            # Initialize Person ReID
+            self.logger.info("Initializing Person Re-Identification...")
+            self.person_reid = PersonReID(self.config.get_all())
+
+            # Initialize Behavioral Analysis
+            self.logger.info("Initializing Behavioral Analysis...")
+            self.behavioral_analysis = BehavioralAnalysis(self.config.get_all())
+
+            # Initialize Threat Assessment
+            self.logger.info("Initializing Threat Assessment...")
+            self.threat_assessment = ThreatAssessment(self.config.get_all())
+
+            # Initialize Zone Manager
+            self.logger.info("Initializing Zone Manager...")
+            self.zone_manager = ZoneManager(self.database)
+
+            # Initialize Anomaly Detector
+            self.logger.info("Initializing Anomaly Detector...")
+            self.anomaly_detector = AnomalyDetector(self.config.get_all())
+
+            # Initialize Alert Manager
+            self.logger.info("Initializing Alert Manager...")
+            self.alert_manager = AlertManager(self.config.get_all(), self.database)
+
+            # Initialize Authentication Manager
+            self.logger.info("Initializing Authentication Manager...")
+            self.auth_manager = AuthenticationManager(self.database, self.config.get_all())
+
+            # Initialize Audit Logger
+            self.logger.info("Initializing Audit Logger...")
+            self.audit_logger = AuditLogger(self.database, self.config.get_all())
+
+            # Log system start
+            if self.audit_logger:
+                self.audit_logger.log_system_event(
+                    event_type=AuditEventType.SYSTEM_STARTED,
+                    message="Multi-Camera Intrusion Detection System started",
+                    severity=AuditSeverity.INFO
+                )
 
             # Start health monitoring
             self.camera_manager.start_health_monitor(interval=5.0)
@@ -271,6 +327,22 @@ class IntrusionDetectionSystem:
         self.logger.info("Stopping system...")
 
         self.is_running = False
+
+        # Log system stop
+        if self.audit_logger:
+            self.audit_logger.log_system_event(
+                event_type=AuditEventType.SYSTEM_STOPPED,
+                message="Multi-Camera Intrusion Detection System stopped",
+                severity=AuditSeverity.INFO
+            )
+
+        # Stop alert manager
+        if self.alert_manager:
+            self.alert_manager.stop()
+
+        # Close behavioral analysis
+        if self.behavioral_analysis:
+            self.behavioral_analysis.close()
 
         # Stop cameras
         if self.camera_manager:
