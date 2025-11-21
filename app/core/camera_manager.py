@@ -98,7 +98,14 @@ class Camera:
         try:
             # Try to open camera (supports both int IDs and device paths)
             logger.info(f"Connecting to camera: {self.name} ({self.device_identifier})")
-            self.capture = cv2.VideoCapture(self.device_identifier)
+
+            # For device paths, use V4L2 backend explicitly on Linux
+            if isinstance(self.device_identifier, str) and self.device_identifier.startswith('/dev/video'):
+                # Use V4L2 backend for Linux devices
+                logger.debug(f"{self.name}: Using V4L2 backend for {self.device_identifier}")
+                self.capture = cv2.VideoCapture(self.device_identifier, cv2.CAP_V4L2)
+            else:
+                self.capture = cv2.VideoCapture(self.device_identifier)
 
             if not self.capture.isOpened():
                 logger.error(f"Failed to open camera {self.name} ({self.device_identifier})")
@@ -108,6 +115,18 @@ class Camera:
             self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
             self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
             self.capture.set(cv2.CAP_PROP_FPS, self.target_fps)
+
+            # Try to read a test frame to verify the camera actually works
+            logger.debug(f"{self.name}: Testing frame capture...")
+            ret, test_frame = self.capture.read()
+            if not ret or test_frame is None:
+                logger.error(f"Camera opened but cannot read frames: {self.name} ({self.device_identifier})")
+                logger.error(f"This might be a metadata device. Try a different /dev/video* device.")
+                self.capture.release()
+                self.capture = None
+                return False
+
+            logger.debug(f"{self.name}: Test frame captured successfully")
 
             # Verify actual resolution
             actual_width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -123,7 +142,10 @@ class Camera:
             return True
 
         except Exception as e:
-            logger.error(f"Error connecting to camera {self.camera_id}: {e}")
+            logger.error(f"Error connecting to camera {self.camera_id}: {e}", exc_info=True)
+            if self.capture is not None:
+                self.capture.release()
+                self.capture = None
             return False
 
     def disconnect(self) -> None:
