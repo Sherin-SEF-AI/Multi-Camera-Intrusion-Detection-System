@@ -8,29 +8,34 @@ A production-grade, enterprise-level security monitoring application using multi
 
 ## 🚀 Features
 
-### Core Capabilities
+### ✅ Implemented Core Features
 
 - **Multi-Camera Support**: Manage up to 3+ USB webcams simultaneously with auto-detection
 - **Real-Time Person Detection**: YOLOv8/YOLOv10-based AI detection with GPU acceleration
 - **Multi-Object Tracking**: Advanced tracking with unique ID assignment across frames
-- **Person Re-Identification**: Track individuals across multiple cameras
 - **Video Recording**: H.264/H.265 encoding with event-triggered and continuous modes
 - **Database Management**: SQLite/PostgreSQL support with comprehensive data models
 - **Health Monitoring**: Automatic camera health checks and reconnection
+- **Professional PyQt6 GUI**: Modern dark-themed interface with 5 comprehensive tabs
+- **Multi-Channel Alerts**: Email (SMTP), SMS (Twilio), Webhook, and system notifications
+- **Threat Assessment**: AI-powered risk scoring (0-100) with 8-factor analysis
+- **Behavioral Analysis**: Loitering, running, falls, erratic movement detection
+- **Zone Management**: Geofencing with polygon zones and violation detection
+- **Person Database**: Authorization levels, re-identification support
+- **Analytics Dashboard**: Real-time statistics, charts, and performance metrics
+- **Settings Management**: Complete configuration via GUI
 
-### Planned Features (Development Roadmap)
+### 🚧 Advanced Features (Planned)
 
-- PyQt6 modern dark-themed GUI
-- Zone management and geofencing
-- Behavioral analysis with pose detection (MediaPipe)
-- Anomaly detection (Isolation Forest, Autoencoders)
-- Threat assessment and risk scoring
-- Multi-channel alerts (Email, SMS, Webhook)
-- Cross-camera tracking
+- Person re-identification with deep learning (OSNet/FastReID)
+- Cross-camera tracking and global ID assignment
+- Advanced anomaly detection (Isolation Forest, Autoencoders)
 - People counting and occupancy tracking
-- Analytics dashboard and reporting
-- Playback and review system
-- User authentication and access control
+- Crowd analysis and density monitoring
+- Playback and review system with timeline
+- User authentication and multi-user support
+- Mobile app integration
+- Cloud backup and remote monitoring
 
 ---
 
