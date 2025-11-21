@@ -388,29 +388,6 @@ class Recording(Base):
         return f"<Recording(id={self.id}, camera={self.camera_id}, duration={self.duration}s)>"
 
 
-class User(Base):
-    """
-    User model for authentication and access control.
-    """
-    __tablename__ = 'users'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(100), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
-    email = Column(String(255), unique=True, nullable=True)
-    full_name = Column(String(255), nullable=True)
-    role = Column(String(50), default="viewer")  # admin, operator, viewer
-    is_active = Column(Boolean, default=True)
-    last_login = Column(DateTime, nullable=True)
-    failed_login_attempts = Column(Integer, default=0)
-    locked_until = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<User(id={self.id}, username='{self.username}', role='{self.role}')>"
-
-
 class PeopleCount(Base):
     """
     People counting model for tracking occupancy over time.
