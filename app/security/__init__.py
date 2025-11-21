@@ -6,10 +6,12 @@ from app.security.auth_manager import (
     Session,
     ROLE_PERMISSIONS
 )
+from app.security.two_factor_auth import TwoFactorAuth
 
 __all__ = [
     'AuthenticationManager',
     'Permission',
     'Session',
-    'ROLE_PERMISSIONS'
+    'ROLE_PERMISSIONS',
+    'TwoFactorAuth'
 ]

@@ -25,6 +25,8 @@ class CameraInfo:
     resolution: Tuple[int, int]  # (width, height)
     fps: int
     enabled: bool
+    device: Optional[str] = None  # Device path like /dev/video0
+    location: Optional[str] = None  # Physical location
     is_connected: bool = False
     current_fps: float = 0.0
     dropped_frames: int = 0
@@ -34,6 +36,7 @@ class CameraInfo:
 class Camera:
     """
     Represents a single camera with its capture device and settings.
+    Supports both integer IDs and device paths (e.g., /dev/video0).
     """
 
     def __init__(
@@ -42,19 +45,23 @@ class Camera:
         name: str = "",
         resolution: Tuple[int, int] = (1280, 720),
         fps: int = 30,
-        buffer_size: int = 100
+        buffer_size: int = 100,
+        device_path: Optional[str] = None
     ):
         """
         Initialize camera.
 
         Args:
-            camera_id: Camera device ID
+            camera_id: Camera device ID (used as identifier)
             name: Human-readable camera name
             resolution: Desired resolution (width, height)
             fps: Desired frames per second
             buffer_size: Maximum number of frames to buffer
+            device_path: Device path (e.g., /dev/video0) or None to use camera_id
         """
         self.camera_id = camera_id
+        self.device_path = device_path
+        self.device_identifier = device_path if device_path else camera_id
         self.name = name or f"Camera {camera_id}"
         self.resolution = resolution
         self.target_fps = fps
@@ -89,11 +96,12 @@ class Camera:
             True if connection successful, False otherwise
         """
         try:
-            # Try to open camera
-            self.capture = cv2.VideoCapture(self.camera_id)
+            # Try to open camera (supports both int IDs and device paths)
+            logger.info(f"Connecting to camera: {self.name} ({self.device_identifier})")
+            self.capture = cv2.VideoCapture(self.device_identifier)
 
             if not self.capture.isOpened():
-                logger.error(f"Failed to open camera {self.camera_id}")
+                logger.error(f"Failed to open camera {self.name} ({self.device_identifier})")
                 return False
 
             # Set camera properties
@@ -379,17 +387,19 @@ class CameraManager:
             resolution = tuple(config.get('resolution', [1280, 720]))
             fps = config.get('fps', 30)
             enabled = config.get('enabled', True)
+            device_path = config.get('device', None)  # Device path like /dev/video0
 
             if not enabled:
                 logger.info(f"Camera {camera_id} is disabled, skipping")
                 continue
 
-            # Create camera
+            # Create camera (supports both integer IDs and device paths)
             camera = Camera(
                 camera_id=camera_id,
                 name=name,
                 resolution=resolution,
-                fps=fps
+                fps=fps,
+                device_path=device_path
             )
 
             # Connect and start capture

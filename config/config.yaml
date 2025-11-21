@@ -9,31 +9,44 @@ app:
 
 # Camera Configuration
 cameras:
-  auto_detect: true
-  num_cameras: 3
+  auto_detect: false  # Use specific device paths
+  num_cameras: 4
   default_resolution: [1280, 720]  # [width, height]
   default_fps: 30
   reconnect_attempts: 5
   reconnect_delay: 2  # seconds
   frame_buffer_size: 100
 
-  # Individual camera settings (override defaults)
+  # Individual camera settings (your actual cameras)
   camera_configs:
     - id: 0
-      name: "Front Entrance"
-      resolution: [1920, 1080]
+      name: "ACER HD User Facing"
+      device: "/dev/video0"
+      resolution: [1280, 720]
       fps: 30
       enabled: true
-    - id: 1
-      name: "Parking Lot"
-      resolution: [1280, 720]
-      fps: 25
-      enabled: true
+      location: "Built-in Laptop Camera"
     - id: 2
-      name: "Back Door"
+      name: "Logitech UVC Camera 1"
+      device: "/dev/video2"
       resolution: [1280, 720]
-      fps: 25
+      fps: 30
       enabled: true
+      location: "Front Entrance"
+    - id: 4
+      name: "Logitech UVC Camera 2"
+      device: "/dev/video4"
+      resolution: [1280, 720]
+      fps: 30
+      enabled: true
+      location: "Side Area"
+    - id: 6
+      name: "Logitech C270 HD"
+      device: "/dev/video6"
+      resolution: [1280, 720]
+      fps: 30
+      enabled: true
+      location: "Back Door"
 
 # Detection Settings
 detection:
@@ -261,6 +274,37 @@ paths:
   exports: "exports"
   backups: "backups"
 
+# Two-Factor Authentication
+two_factor_auth:
+  enabled: true
+  issuer_name: "Intrusion Detection System"
+
+# Crowd Analytics
+crowd_analytics:
+  enabled: true
+  area_size_sqm: 100.0  # Area size in square meters
+  social_distance_m: 2.0  # Social distancing threshold in meters
+  density_thresholds:
+    low: 0.1     # < 0.1 people/m²
+    medium: 0.3  # 0.1-0.3 people/m²
+    high: 0.5    # 0.3-0.5 people/m²
+    critical: 0.5  # > 0.5 people/m²
+  heatmap_resolution: [50, 50]  # Heatmap dimensions
+  heatmap_decay: 0.95  # Decay factor per frame
+
+# Advanced Detection (vehicles, packages, weapons, etc.)
+advanced_detection:
+  enabled: true
+  model: "yolov8n.pt"  # Can use yolov8m.pt for better accuracy
+  confidence_threshold: 0.5
+  device: "cuda"  # cuda or cpu
+  target_categories:
+    - "person"
+    - "vehicle"
+    - "package"
+    - "weapon"
+    - "animal"
+
 # Advanced Features
 advanced:
   enable_api: false
@@ -269,4 +313,7 @@ advanced:
   enable_mobile_notifications: false
   enable_facial_recognition: false  # Requires additional setup
   enable_license_plate_recognition: false
-  enable_weapon_detection: false
+  enable_weapon_detection: true  # Now supported via advanced_detection
+  enable_vehicle_detection: true
+  enable_package_detection: true
+  enable_crowd_analytics: true
