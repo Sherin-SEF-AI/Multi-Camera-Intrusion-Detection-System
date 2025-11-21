@@ -1,0 +1,255 @@
+# Multi-Camera Intrusion Detection System Configuration
+
+# Application Settings
+app:
+  name: "Advanced Intrusion Detection System"
+  version: "1.0.0"
+  debug: false
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+# Camera Configuration
+cameras:
+  auto_detect: true
+  num_cameras: 3
+  default_resolution: [1280, 720]  # [width, height]
+  default_fps: 30
+  reconnect_attempts: 5
+  reconnect_delay: 2  # seconds
+  frame_buffer_size: 100
+
+  # Individual camera settings (override defaults)
+  camera_configs:
+    - id: 0
+      name: "Front Entrance"
+      resolution: [1920, 1080]
+      fps: 30
+      enabled: true
+    - id: 1
+      name: "Parking Lot"
+      resolution: [1280, 720]
+      fps: 25
+      enabled: true
+    - id: 2
+      name: "Back Door"
+      resolution: [1280, 720]
+      fps: 25
+      enabled: true
+
+# Detection Settings
+detection:
+  model: "yolov8n.pt"  # yolov8n, yolov8s, yolov8m, yolov8l, yolov8x
+  confidence_threshold: 0.5
+  iou_threshold: 0.45
+  device: "cuda"  # cuda, cpu, mps
+  enable_gpu: true
+  half_precision: false  # FP16 for faster inference
+  batch_size: 1
+  target_classes: [0]  # 0 = person in COCO dataset
+  detection_interval: 1  # Process every N frames (1 = every frame)
+
+# Tracking Settings
+tracking:
+  algorithm: "bytetrack"  # bytetrack, deepsort
+  max_age: 30  # frames to keep track alive without detection
+  min_hits: 3  # minimum detections before track is confirmed
+  iou_threshold: 0.3
+  track_buffer: 30
+  match_threshold: 0.8
+
+# Person Re-Identification
+reid:
+  enabled: true
+  model: "osnet_x1_0"  # osnet_x1_0, osnet_x0_75, resnet50
+  feature_dim: 512
+  similarity_threshold: 0.6
+  device: "cuda"
+  extraction_interval: 5  # Extract features every N frames
+  min_quality_score: 0.3  # Skip blurry/occluded detections
+
+# Behavioral Analysis
+behavior:
+  enabled: true
+  pose_detection: true
+  pose_model: "mediapipe"  # mediapipe, openpose
+  loitering_threshold: 30  # seconds
+  running_speed_threshold: 2.5  # meters per second
+  fall_detection: true
+  aggressive_behavior_detection: true
+  crowd_analysis: true
+
+# Anomaly Detection
+anomaly:
+  enabled: true
+  algorithm: "isolation_forest"  # isolation_forest, autoencoder, one_class_svm
+  training_period: 7  # days to collect normal behavior
+  contamination: 0.1  # expected proportion of anomalies
+  sensitivity: 0.5  # 0.0 (low) to 1.0 (high)
+
+# Threat Assessment
+threat:
+  enabled: true
+  # Risk score weights (must sum to 1.0)
+  weights:
+    identity_status: 0.30
+    behavior_anomaly: 0.25
+    location_criticality: 0.20
+    time_factor: 0.10
+    trajectory_abnormality: 0.10
+    dwell_time: 0.05
+
+  # Threat levels
+  levels:
+    low: [0, 25]
+    medium: [26, 50]
+    high: [51, 75]
+    critical: [76, 100]
+
+# Zone Configuration
+zones:
+  enabled: true
+  default_zone_type: "monitored"  # monitored, restricted, entrance, exit, perimeter
+
+# Alert System
+alerts:
+  enabled: true
+
+  # Email alerts
+  email:
+    enabled: true
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    use_tls: true
+    sender_email: ""
+    sender_password: ""
+    recipients: []
+    include_snapshot: true
+    include_video: false
+
+  # SMS alerts (Twilio)
+  sms:
+    enabled: false
+    account_sid: ""
+    auth_token: ""
+    from_number: ""
+    to_numbers: []
+
+  # Webhook alerts
+  webhook:
+    enabled: false
+    url: ""
+    method: "POST"
+    headers: {}
+    timeout: 10
+
+  # System alerts (in-app)
+  system:
+    enabled: true
+    sound: true
+    desktop_notification: true
+
+  # Alert rules
+  rules:
+    min_interval: 60  # seconds between similar alerts
+    aggregate_similar: true
+    quiet_hours:
+      enabled: false
+      start: "22:00"
+      end: "06:00"
+
+# Recording Settings
+recording:
+  enabled: true
+  mode: "event_triggered"  # continuous, event_triggered, manual
+  codec: "h264"  # h264, h265, mjpeg
+  quality: "medium"  # low, medium, high
+  fps: 15
+
+  # Event-triggered recording
+  pre_event_duration: 10  # seconds before event
+  post_event_duration: 30  # seconds after event
+
+  # Continuous recording
+  segment_duration: 3600  # seconds (1 hour)
+
+  # Storage management
+  max_storage_gb: 500
+  auto_delete_old: true
+  retention_days: 30
+  low_space_threshold_gb: 50
+
+# Database Settings
+database:
+  type: "sqlite"  # sqlite, postgresql
+  sqlite:
+    path: "database/intrusion_detection.db"
+  postgresql:
+    host: "localhost"
+    port: 5432
+    database: "intrusion_detection"
+    user: ""
+    password: ""
+
+  # Database maintenance
+  auto_vacuum: true
+  optimize_interval: 7  # days
+
+# Performance Settings
+performance:
+  max_threads: 10
+  queue_max_size: 1000
+  frame_skip_on_overload: true
+  memory_limit_mb: 4096
+  enable_profiling: false
+
+# Security Settings
+security:
+  authentication_required: true
+  session_timeout: 3600  # seconds
+  max_login_attempts: 5
+  lockout_duration: 300  # seconds
+  encrypt_database: false
+  encrypt_recordings: false
+  password_min_length: 8
+
+# GUI Settings
+gui:
+  theme: "dark"  # dark, light
+  window_size: [1920, 1080]
+  fullscreen: false
+  show_fps: true
+  show_confidence: true
+  show_track_id: true
+  show_trajectories: true
+  trajectory_length: 30  # frames
+  bbox_thickness: 2
+  font_size: 12
+
+# Logging Settings
+logging:
+  level: "INFO"
+  log_to_file: true
+  log_to_console: true
+  log_file_path: "logs/intrusion_detection.log"
+  max_file_size_mb: 10
+  backup_count: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Paths
+paths:
+  models: "app/models"
+  recordings: "recordings"
+  snapshots: "snapshots"
+  database: "database"
+  logs: "logs"
+  exports: "exports"
+  backups: "backups"
+
+# Advanced Features
+advanced:
+  enable_api: false
+  api_port: 8000
+  enable_cloud_backup: false
+  enable_mobile_notifications: false
+  enable_facial_recognition: false  # Requires additional setup
+  enable_license_plate_recognition: false
+  enable_weapon_detection: false

@@ -1,0 +1,104 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.env.local
+
+# Application specific
+logs/*.log
+database/*.db
+recordings/*.mp4
+recordings/*.avi
+snapshots/*.jpg
+snapshots/*.png
+exports/*
+backups/*
+
+# AI Models (large files)
+app/models/*.pt
+app/models/*.onnx
+app/models/*.pth
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test files
+test_*.py
+*_test.py
+tests/__pycache__/
+
+# Coverage
+.coverage
+htmlcov/
+*.cover
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# PyTest
+.pytest_cache/
+
+# Database
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Keep directory structure
+!logs/.gitkeep
+!database/.gitkeep
+!recordings/.gitkeep
+!snapshots/.gitkeep
+!exports/.gitkeep
+!backups/.gitkeep
+!app/models/.gitkeep
