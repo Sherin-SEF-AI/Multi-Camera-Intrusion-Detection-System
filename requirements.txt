@@ -21,6 +21,9 @@ scikit-learn==1.4.0
 # Pose Estimation & Behavioral Analysis
 mediapipe==0.10.9
 
+# Zone Management & Geofencing
+shapely==2.0.2
+
 # Anomaly Detection
 scikit-learn==1.4.0  # Isolation Forest, One-Class SVM
 
