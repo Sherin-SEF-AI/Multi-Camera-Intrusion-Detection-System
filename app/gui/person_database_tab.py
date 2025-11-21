@@ -328,10 +328,13 @@ class PersonDatabaseTab(QWidget):
 
                 # TODO: Process photo and extract features
 
+                # Store name before saving (to avoid detached instance error)
+                person_name = person_data['name']
+
                 # Save to database
                 self.system.database.add(person)
 
-                QMessageBox.information(self, "Success", f"Person '{person.name}' added successfully!")
+                QMessageBox.information(self, "Success", f"Person '{person_name}' added successfully!")
                 self._load_persons()
 
             except Exception as e:
