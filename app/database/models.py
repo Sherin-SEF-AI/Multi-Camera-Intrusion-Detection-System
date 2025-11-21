@@ -83,6 +83,38 @@ class LogLevel(enum.Enum):
     CRITICAL = "CRITICAL"
 
 
+class UserRole(enum.Enum):
+    """User roles for authentication and authorization."""
+    ADMIN = "admin"
+    OPERATOR = "operator"
+    VIEWER = "viewer"
+
+
+class User(Base):
+    """
+    User model for authentication and authorization.
+    Supports role-based access control (RBAC).
+    """
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(100), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    full_name = Column(String(255), nullable=False)
+    role = Column(Enum(UserRole), default=UserRole.VIEWER, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    last_login = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    system_logs = relationship("SystemLog", back_populates="user")
+
+    def __repr__(self):
+        return f"<User(id={self.id}, username='{self.username}', role={self.role.value})>"
+
+
 class Person(Base):
     """
     Person model for storing known individuals.
@@ -304,19 +336,26 @@ class SystemLog(Base):
     __tablename__ = 'system_logs'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
-    log_level = Column(Enum(LogLevel), nullable=False, index=True)
+    level = Column(Enum(LogLevel), nullable=False, index=True)
+    log_level = Column(Enum(LogLevel), nullable=False, index=True)  # Backwards compatibility
     module = Column(String(255), nullable=False)
     message = Column(Text, nullable=False)
+    details = Column(JSON, default=dict)  # For audit logging
     exception_traceback = Column(Text, nullable=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+
+    # Relationships
+    user = relationship("User", back_populates="system_logs")
 
     # Index for efficient queries
     __table_args__ = (
-        Index('idx_level_time', 'log_level', 'timestamp'),
+        Index('idx_level_time', 'level', 'timestamp'),
     )
 
     def __repr__(self):
-        return f"<SystemLog(id={self.id}, level={self.log_level.value}, module='{self.module}')>"
+        return f"<SystemLog(id={self.id}, level={self.level.value}, module='{self.module}')>"
 
 
 class Recording(Base):
